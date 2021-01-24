@@ -47,10 +47,11 @@ class Canvas(canvas.Canvas):
 
 
 class PdfGenerator:
-    TABLE_TITLE = 'Report'
     APP_NAME = 'App name'
+    TABLE_TITLE = 'Report'
     TABLE_HEADER_TITLES = ["No.", "Col.1", "Col.2", "Col.3", "Col.4"]
     DATA_COLUMNS_NAMES = ['id', 'name', 'email', 'phone', 'address']
+    # Required: Specify for each column table have
     TABLE_ALIGN_STYLE = [
         ParagraphStyle(name="01", alignment=TA_CENTER),
         ParagraphStyle(name="02", alignment=TA_LEFT),
@@ -58,7 +59,9 @@ class PdfGenerator:
         ParagraphStyle(name="04", alignment=TA_CENTER),
         ParagraphStyle(name="05", alignment=TA_CENTER)
     ]
+    # Specify for each column table have or None
     COLUMN_WIDTHS = [50, 200, 80, 80, 80]
+    # Need to have as many items as table have columns
     TOTAL_ROW_CONTENT = ["Total", "", "", "", "Your total results"]
 
     TOP_IMAGE_LEFT = 'static/sample-1.png'
@@ -132,9 +135,7 @@ class PdfGenerator:
 
         spacer = Spacer(10, 22)
         self.elements.append(spacer)
-        """
-        Create the line items
-        """
+
         table_head = []
         table_header_titles = self.TABLE_HEADER_TITLES
 
