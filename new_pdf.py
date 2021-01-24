@@ -22,7 +22,7 @@ class Canvas(canvas.Canvas):
         page_count = len(self.pages)
         for page in self.pages:
             self.__dict__.update(page)
-            if (self._pageNumber > 1):
+            if self._pageNumber > 1:
                 self.draw_canvas(page_count)
             canvas.Canvas.showPage(self)
         canvas.Canvas.save(self)
@@ -33,10 +33,10 @@ class Canvas(canvas.Canvas):
         self.saveState()
         self.setStrokeColorRGB(0, 0, 0)
         self.setLineWidth(0.5)
-        self.drawImage("cover.png", self.width - inch * 8 - 5, self.height - 50, width=100, height=20,
-                       preserveAspectRatio=True)
-        self.drawImage("Django Rest  stack.png", self.width - inch * 2, self.height - 50, width=100, height=30,
-                       preserveAspectRatio=True, mask='auto')
+        # self.drawImage("cover.png", self.width - inch * 8 - 5, self.height - 50, width=100, height=20,
+        #                preserveAspectRatio=True)
+        # self.drawImage("Django Rest  stack.png", self.width - inch * 2, self.height - 50, width=100, height=30,
+        #                preserveAspectRatio=True, mask='auto')
         self.line(30, 740, LETTER[0] - 50, 740)
         self.line(66, 78, LETTER[0] - 66, 78)
         self.setFont('Times-Roman', 10)
@@ -44,26 +44,9 @@ class Canvas(canvas.Canvas):
         self.restoreState()
 
 
-TA_LEFT_ = 0
-TA_CENTER_ = 1
-TA_RIGHT_ = 2
-TA_JUSTIFY_ = 4
-
-
-class Sample:
-    COUNT = 0
-
-    def __init__(self):
-        id = self.COUNT
-        name = self.COUNT
-        email = self.COUNT
-        phone = self.COUNT
-        address = self.COUNT
-        self.COUNT += 1
-
-
 class PdfGenerator:
     TABLE_TITLE = 'Report'
+    APP_NAME = 'App name'
     TABLE_HEADER_TITLES = ["No.", "Col.1", "Col.2", "Col.3", "Col.4"]
     TABLE_ALIGN_STYLE = [
         ParagraphStyle(name="01", alignment=TA_CENTER),
@@ -73,12 +56,13 @@ class PdfGenerator:
         ParagraphStyle(name="05", alignment=TA_CENTER)
     ]
     COLUMN_WIDTHS = [50, 200, 80, 80, 80]
-    TOTAL_ROW_CONTENT = ["Total", "", "", "", "9000 sample"]
+    TOTAL_ROW_CONTENT = ["Total", "", "", "", "Your total results"]
+    DATA_COLUMNS_NAMES = ['id', 'name', 'email', 'phone', 'address']
 
-    def __init__(self, path):
+    def __init__(self, path, data_records):
         # Same length
         has_same_length = len(self.TABLE_HEADER_TITLES) == len(self.TABLE_ALIGN_STYLE) == \
-                          len(self.COLUMN_WIDTHS) == len(self.TOTAL_ROW_CONTENT)
+                          len(self.COLUMN_WIDTHS) == len(self.TOTAL_ROW_CONTENT) == len(self.DATA_COLUMNS_NAMES)
         assert has_same_length, 'You forgot to set the same element length in TABLE_HEADER_TITLES, TABLE_ALIGN_STYLE, ' \
                                 'COLUMN_WIDTHS, TOTAL_ROW_CONTENT '
 
@@ -95,44 +79,43 @@ class PdfGenerator:
         self.colorOhkaBlue1 = Color((122.0 / 255), (180.0 / 255), (225.0 / 255), 1)
         self.colorOhkaGreenLineas = Color((50.0 / 255), (140.0 / 255), (140.0 / 255), 1)
 
-        self.nextPagesHeader(True)
-        self.set_table()
+        self.page_title()
+        self.set_table(data_records)
         # Build
         self.doc = SimpleDocTemplate(path, pagesize=LETTER)
         self.doc.multiBuild(self.elements, canvasmaker=Canvas)
 
-    def nextPagesHeader(self, isSecondPage):
-        if isSecondPage:
-            psHeaderText = ParagraphStyle('Hed0', fontSize=16, alignment=TA_LEFT, borderWidth=3,
-                                          textColor=self.colorOhkaGreen0)
-            text = 'App name'
-            paragraphReportHeader = Paragraph(text, psHeaderText)
-            self.elements.append(paragraphReportHeader)
+    def page_title(self):
+        psHeaderText = ParagraphStyle('Hed0', fontSize=16, alignment=TA_LEFT, borderWidth=3,
+                                      textColor=self.colorOhkaGreen0)
+        text = self.APP_NAME
+        paragraphReportHeader = Paragraph(text, psHeaderText)
+        self.elements.append(paragraphReportHeader)
 
-            spacer = Spacer(10, 10)
-            self.elements.append(spacer)
+        spacer = Spacer(10, 10)
+        self.elements.append(spacer)
 
-            d = Drawing(500, 1)
-            line = Line(-15, 0, 483, 0)
-            line.strokeColor = self.colorOhkaGreenLineas
-            line.strokeWidth = 2
-            d.add(line)
-            self.elements.append(d)
+        d = Drawing(500, 1)
+        line = Line(-15, 0, 483, 0)
+        line.strokeColor = self.colorOhkaGreenLineas
+        line.strokeWidth = 2
+        d.add(line)
+        self.elements.append(d)
 
-            spacer = Spacer(10, 1)
-            self.elements.append(spacer)
+        spacer = Spacer(10, 1)
+        self.elements.append(spacer)
 
-            d = Drawing(500, 1)
-            line = Line(-15, 0, 483, 0)
-            line.strokeColor = self.colorOhkaGreenLineas
-            line.strokeWidth = 0.5
-            d.add(line)
-            self.elements.append(d)
+        d = Drawing(500, 1)
+        line = Line(-15, 0, 483, 0)
+        line.strokeColor = self.colorOhkaGreenLineas
+        line.strokeWidth = 0.5
+        d.add(line)
+        self.elements.append(d)
 
-            spacer = Spacer(10, 22)
-            self.elements.append(spacer)
+        spacer = Spacer(10, 22)
+        self.elements.append(spacer)
 
-    def set_table(self):
+    def set_table(self, table_data):
         header_paragraph_style = ParagraphStyle('Hed0', fontSize=12, alignment=TA_LEFT, borderWidth=3,
                                                 textColor=self.colorOhkaBlue0)
         text = self.TABLE_TITLE
@@ -163,8 +146,8 @@ class PdfGenerator:
 
         # Table body content
 
-        for row in range(1):
-            row_data = [str(row_no), "Miércoles, 11 de diciembre de 2019", "17:30", "19:24", "1:54"]
+        for row in table_data:
+            row_data = [getattr(row, field) for field in self.DATA_COLUMNS_NAMES]
             column_number = 0
 
             for item in row_data:
@@ -200,5 +183,16 @@ class PdfGenerator:
         self.elements.append(full_table)
 
 
+class Sample:
+
+    def __init__(self):
+        self.id = 0
+        self.name = 0
+        self.email = 0
+        self.phone = 0
+        self.address = 0
+
+
 if __name__ == '__main__':
-    report = PdfGenerator('psreport.pdf')
+    data_records = [Sample() for x in range(100)]
+    report = PdfGenerator('psreport.pdf', data_records)
