@@ -48,6 +48,7 @@ class PdfGenerator:
     TABLE_TITLE = 'Report'
     APP_NAME = 'App name'
     TABLE_HEADER_TITLES = ["No.", "Col.1", "Col.2", "Col.3", "Col.4"]
+    DATA_COLUMNS_NAMES = ['id', 'name', 'email', 'phone', 'address']
     TABLE_ALIGN_STYLE = [
         ParagraphStyle(name="01", alignment=TA_CENTER),
         ParagraphStyle(name="02", alignment=TA_LEFT),
@@ -57,12 +58,11 @@ class PdfGenerator:
     ]
     COLUMN_WIDTHS = [50, 200, 80, 80, 80]
     TOTAL_ROW_CONTENT = ["Total", "", "", "", "Your total results"]
-    DATA_COLUMNS_NAMES = ['id', 'name', 'email', 'phone', 'address']
 
     def __init__(self, path, data_records):
         # Same length
         has_same_length = len(self.TABLE_HEADER_TITLES) == len(self.TABLE_ALIGN_STYLE) == \
-                          len(self.COLUMN_WIDTHS) == len(self.TOTAL_ROW_CONTENT) == len(self.DATA_COLUMNS_NAMES)
+                          len(self.TOTAL_ROW_CONTENT) == len(self.DATA_COLUMNS_NAMES)
         assert has_same_length, 'You forgot to set the same element length in TABLE_HEADER_TITLES, TABLE_ALIGN_STYLE, ' \
                                 'COLUMN_WIDTHS, TOTAL_ROW_CONTENT '
 
@@ -168,7 +168,8 @@ class PdfGenerator:
             formatted_row_data.append(p)
         table.append(formatted_row_data)
 
-        full_table = Table(table, colWidths=[50, 200, 80, 80, 80])
+        full_table = Table(table, colWidths=self.COLUMN_WIDTHS) if self.COLUMN_WIDTHS else Table(table)
+
         table_style = TableStyle(
             [  # ('GRID',(0, 0), (-1, -1), 0.5, grey),
                 ('ALIGN', (0, 0), (0, -1), 'LEFT'),
