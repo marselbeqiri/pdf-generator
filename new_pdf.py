@@ -8,6 +8,8 @@ from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Table, Tab
 
 
 class Canvas(canvas.Canvas):
+    TOP_IMAGE_LEFT = None
+    TOP_IMAGE_RIGHT = None
 
     def __init__(self, *args, **kwargs):
         canvas.Canvas.__init__(self, *args, **kwargs)
@@ -33,10 +35,10 @@ class Canvas(canvas.Canvas):
         self.saveState()
         self.setStrokeColorRGB(0, 0, 0)
         self.setLineWidth(0.5)
-        # self.drawImage("cover.png", self.width - inch * 8 - 5, self.height - 50, width=100, height=20,
-        #                preserveAspectRatio=True)
-        # self.drawImage("Django Rest  stack.png", self.width - inch * 2, self.height - 50, width=100, height=30,
-        #                preserveAspectRatio=True, mask='auto')
+        self.drawImage(self.TOP_IMAGE_RIGHT, self.width - inch * 8 - 5, self.height - 50, width=100, height=20,
+                       preserveAspectRatio=True)
+        self.drawImage(self.TOP_IMAGE_LEFT, self.width - inch * 2, self.height - 50, width=100, height=30,
+                       preserveAspectRatio=True, mask='auto')
         self.line(30, 740, LETTER[0] - 50, 740)
         self.line(66, 78, LETTER[0] - 66, 78)
         self.setFont('Times-Roman', 10)
@@ -59,7 +61,13 @@ class PdfGenerator:
     COLUMN_WIDTHS = [50, 200, 80, 80, 80]
     TOTAL_ROW_CONTENT = ["Total", "", "", "", "Your total results"]
 
+    TOP_IMAGE_LEFT = 'static/sample-1.png'
+    TOP_IMAGE_RIGHT = 'static/sample-2.jfif'
+
     def __init__(self, path, data_records):
+        custom_canvas = Canvas
+        custom_canvas.TOP_IMAGE_LEFT = self.TOP_IMAGE_LEFT
+        custom_canvas.TOP_IMAGE_RIGHT = self.TOP_IMAGE_RIGHT
         # Same length
         has_same_length = len(self.TABLE_HEADER_TITLES) == len(self.TABLE_ALIGN_STYLE) == \
                           len(self.TOTAL_ROW_CONTENT) == len(self.DATA_COLUMNS_NAMES)
@@ -71,23 +79,23 @@ class PdfGenerator:
         self.elements = []
 
         # colors
-        self.colorOhkaGreen0 = Color((45.0 / 255), (166.0 / 255), (153.0 / 255), 1)
-        self.colorOhkaGreen1 = Color((182.0 / 255), (227.0 / 255), (166.0 / 255), 1)
-        self.colorOhkaGreen2 = Color((140.0 / 255), (222.0 / 255), (192.0 / 255), 1)
+        self.colorGreen0 = Color((45.0 / 255), (166.0 / 255), (153.0 / 255), 1)
+        self.colorGreen1 = Color((182.0 / 255), (227.0 / 255), (166.0 / 255), 1)
+        self.colorGreen2 = Color((140.0 / 255), (222.0 / 255), (192.0 / 255), 1)
 
-        self.colorOhkaBlue0 = Color((54.0 / 255), (122.0 / 255), (179.0 / 255), 1)
-        self.colorOhkaBlue1 = Color((122.0 / 255), (180.0 / 255), (225.0 / 255), 1)
-        self.colorOhkaGreenLineas = Color((50.0 / 255), (140.0 / 255), (140.0 / 255), 1)
+        self.colorBlue0 = Color((54.0 / 255), (122.0 / 255), (179.0 / 255), 1)
+        self.colorBlue1 = Color((122.0 / 255), (180.0 / 255), (225.0 / 255), 1)
+        self.colorGreenLines = Color((50.0 / 255), (140.0 / 255), (140.0 / 255), 1)
 
         self.page_title()
         self.set_table(data_records)
         # Build
         self.doc = SimpleDocTemplate(path, pagesize=LETTER)
-        self.doc.multiBuild(self.elements, canvasmaker=Canvas)
+        self.doc.multiBuild(self.elements, canvasmaker=custom_canvas)
 
     def page_title(self):
         psHeaderText = ParagraphStyle('Hed0', fontSize=16, alignment=TA_LEFT, borderWidth=3,
-                                      textColor=self.colorOhkaGreen0)
+                                      textColor=self.colorGreen0)
         text = self.APP_NAME
         paragraphReportHeader = Paragraph(text, psHeaderText)
         self.elements.append(paragraphReportHeader)
@@ -97,7 +105,7 @@ class PdfGenerator:
 
         d = Drawing(500, 1)
         line = Line(-15, 0, 483, 0)
-        line.strokeColor = self.colorOhkaGreenLineas
+        line.strokeColor = self.colorGreenLines
         line.strokeWidth = 2
         d.add(line)
         self.elements.append(d)
@@ -107,7 +115,7 @@ class PdfGenerator:
 
         d = Drawing(500, 1)
         line = Line(-15, 0, 483, 0)
-        line.strokeColor = self.colorOhkaGreenLineas
+        line.strokeColor = self.colorGreenLines
         line.strokeWidth = 0.5
         d.add(line)
         self.elements.append(d)
@@ -117,7 +125,7 @@ class PdfGenerator:
 
     def set_table(self, table_data):
         header_paragraph_style = ParagraphStyle('Hed0', fontSize=12, alignment=TA_LEFT, borderWidth=3,
-                                                textColor=self.colorOhkaBlue0)
+                                                textColor=self.colorBlue0)
         text = self.TABLE_TITLE
         header_paragraph = Paragraph(text, header_paragraph_style)
         self.elements.append(header_paragraph)
@@ -175,9 +183,9 @@ class PdfGenerator:
                 ('ALIGN', (0, 0), (0, -1), 'LEFT'),
                 # ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                 ("ALIGN", (1, 0), (1, -1), 'RIGHT'),
-                ('LINEABOVE', (0, 0), (-1, -1), 1, self.colorOhkaBlue1),
-                ('BACKGROUND', (0, 0), (-1, 0), self.colorOhkaGreenLineas),
-                ('BACKGROUND', (0, -1), (-1, -1), self.colorOhkaBlue1),
+                ('LINEABOVE', (0, 0), (-1, -1), 1, self.colorBlue1),
+                ('BACKGROUND', (0, 0), (-1, 0), self.colorGreenLines),
+                ('BACKGROUND', (0, -1), (-1, -1), self.colorBlue1),
                 ('SPAN', (0, -1), (-2, -1))
             ])
         full_table.setStyle(table_style)
@@ -196,4 +204,4 @@ class Sample:
 
 if __name__ == '__main__':
     data_records = [Sample() for x in range(100)]
-    report = PdfGenerator('psreport.pdf', data_records)
+    report = PdfGenerator('pdf_report.pdf', data_records)
