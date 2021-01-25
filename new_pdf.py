@@ -1,5 +1,3 @@
-from io import StringIO, BytesIO
-
 from reportlab.graphics.shapes import Line, Drawing
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
