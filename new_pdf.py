@@ -1,10 +1,12 @@
+from io import StringIO, BytesIO
+
 from reportlab.graphics.shapes import Line, Drawing
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
-from reportlab.lib.pagesizes import LETTER, inch
+from reportlab.lib.pagesizes import LETTER, inch, A5
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.pdfgen import canvas
-from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle)
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 
 
 class Canvas(canvas.Canvas):
@@ -47,6 +49,7 @@ class Canvas(canvas.Canvas):
 
 
 class PdfGenerator:
+    PAGE_SIZE = A5
     APP_NAME = 'App name'
     TABLE_TITLE = 'Report'
     TABLE_HEADER_TITLES = ["No.", "Col.1", "Col.2", "Col.3", "Col.4"]
@@ -206,3 +209,15 @@ class Sample:
 if __name__ == '__main__':
     data_records = [Sample() for x in range(100)]
     report = PdfGenerator('pdf_report.pdf', data_records)
+
+    """ Below code can be integrated to work with Django """
+    # buffer = BytesIO()
+    # doc = PdfGenerator(buffer, data_records)
+    # pdf = buffer.getvalue()
+    # buffer.close()
+
+    # email = EmailMessage('Hello', 'Body', 'from@from.com', ['to@to.com'])
+    # email.attach('invoicex.pdf', pdf, 'application/pdf')
+    # email.send()
+
+    # return Response({'data': base64.b64encode(pdf).decode(), 'title': report.code}, status=status.HTTP_200_OK)
